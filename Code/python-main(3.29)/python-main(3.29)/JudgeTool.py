@@ -7,7 +7,14 @@ Created on Tue Mar 26 12:00:32 2019
 """
 import re
 
-            
+def picture_CropTool(path,location_list):
+    img = cv2.imread(path)
+    i=0
+    for location in location_list:
+        cropped = img[location['top']:location['top']+location['height']
+        , location['left']:location['left']+location['width']]
+        savepath="./"+i+".jpg"
+        cv2.imwrite(savepath, cropped)       
 '''
     判断一句话是否为疑问句／命令句／是非判断句的函数
     return ：True／False
@@ -17,9 +24,9 @@ import re
 def questionemotion_JudgeTool(textcontent):
 
     interrogtive_dict=['吗\?','(有|是)哪[些里]','(有|要)(几|多少)(些|种|分钟|时间|千克|米|吨|本|万)','如何.*(定义|进行|处理)','(什么|何).*(问题|区别|不同|作用|原因)',
-                       '(为|是|有)(什么|何|多少)','请问.(怎么|区别是|看法是|多长时间)','怎样.*(理解|处理)','(问|检验.*(差异|差别|影响))']#疑问句
-    imperative_dict=['\。','请.*(辨析|解释)','求.*(概率|解|面积|值)','求解.*问题','则.*为','一项是','阅读.*[“回答”,“完成”]','简要说明.*区别',
-                     '归纳.主要内容','概[述|论].*(历史意义|作用)','证明','[综结]合.*(体会|理解)','请你.应该是','恰当的是','其中.*是','下列.*是','根据.*给',
+                       '(为|是|有)(什么|何|多少)','请问.(怎么|区别是|看法是|多长时间)','想想看','怎样.*(理解|处理)','(问|检验.*(差异|差别|影响))']#疑问句
+    imperative_dict=['请.*(辨析|解释|证明)','求.*(概率|解|面积|值)','求解.*问题','则.*为','的一项是','阅读.*[“回答”,“完成”]','简要说明.*区别',
+                     '归纳.主要内容','概[述|论].*(历史意义|作用)','[综结]合.*(体会|理解)','请你.应该是','恰当的是','其中.*是','下列.*是','根据.*给',
                      '[句文词].*[默填]写','的(主要内涵|基本标准)','(简析|简述|分析|解释|试论).*(原因|好处|历史条件|程序|流程|意义|产生|应用|内容|影响|策略)',
                      '试加以说明','简要描述','指出.*方面']#命令句
     copulative_dict=['判断','是否','正确.*的是','错误.*的是']#是非判断句
@@ -29,21 +36,22 @@ def questionemotion_JudgeTool(textcontent):
         pattern1=re.compile(p)
         res=pattern1.findall(key)
         if len(res)!=0:
-            print(res)
-            return True
+            print(p)
+            
+            return True,1
     for p in copulative_dict:
         pattern1=re.compile(p)
         res=pattern1.findall(key)
         if len(res)!=0:
-            print(res)
-            return True
+            #print(res)
+            return True,2
     for p in imperative_dict:
         pattern1=re.compile(p)
         res=pattern1.findall(key)
         if len(res)!=0:
-            print(res)
-            return True
-    return False
+            #print(res)
+            return True,3
+    return False,0
 
 
 '''
@@ -66,7 +74,7 @@ def questionnumber_JudgeTool(textcontent):
     for p in questionnumber_dict:
         pattern1 = re.compile(p)
         res=pattern1.findall(key)
-        print(res)
+        #print(res)
         i=i+1
         if(len(res)==0):
             continue
@@ -106,7 +114,7 @@ def option_JudgeTool(textcontent):
     for p in option_dict:
         pattern1 = re.compile(p)
         res=pattern1.findall(key)
-        print(res)
+        #print(res)
         i=i+1
         if(len(res)==0):
             continue
@@ -134,21 +142,25 @@ def option_JudgeTool(textcontent):
 
 '''   
 def note_JudgeTool(textcontent):
-    note_dict=["本试题.部分","签字笔.答题卡","答题区域","(切记不要｜切忌).答题"]
+    note_dict=["注意事项","本试题.*部分","(姓名|座位号|座号|准考证号).*相应位置","铅笔.*答案",
+               "(签字笔|水笔).*答题卡","答题区域","(切记不要|切忌).*答题"]
     key=textcontent
     i=0
     for p in note_dict:
         pattern1 = re.compile(p)
         res=pattern1.findall(key)
-        print(res)
+        #print(res)
         i=i+1
         if(len(res)==0):
             continue
         elif(len(res)==1):
-                return True,"666"
+            if(i==1):
+                return True
+            else:
+                return True
         else:
-            return True,"404"
-    return False,"505"
+            return True
+    return False
 
 '''
     判断一句话是否为题干的函数
@@ -163,31 +175,37 @@ def note_JudgeTool(textcontent):
 def question_JudgeTool(textcontent):
     x=textcontent
     #判断是否为疑问／命令／是非判断
-    isorder=questionemotion_JudgeTool(x)
+    isorder,c=questionemotion_JudgeTool(x)
     #判断是否有题号，以及题号的类型
     hasquestionnumber,numberstyle,code=questionnumber_JudgeTool(x)
-            
+    #print(c)
     if(isorder==True):
         '''初步认为是可能为疑问的题干。但也有可能是阅读题中的反问或者是选择题选项中的问句'''
         if(hasquestionnumber==True):
-            return "YES",numberstyle,"11"
+            return True,numberstyle,"11"
         else:
-            if(option_JudgeTool(x)==True):
-                return "NO",0,"101"
+            isoption,optionstyle,optioncode=option_JudgeTool(x)
+            if(isoption==True):
+                return False,0,"101"
             else:
-                return "YES",numberstyle,"100"
+                return  True,numberstyle,"100"
     elif(isorder==False):
         '''初步认为不为疑问／命令／是非判断。但也有可能是判断题中的陈述句。'''
         if(hasquestionnumber==True):
             '''有题号，所以大致认为是一道题里面的内容'''
             if(note_JudgeTool(x)==True):
-                return "NO",0,"011"
+                return False,0,"011"#注意事项等
             else:
-                return "NO",0,"010"
+                return True,0,"010"#判断题中的陈述句
         else:
             '''既没有题干语气，又没有题号，最难判断的一类。不出意外就是需要忽略的内容'''
-            if(option_JudgeTool(x)==True):
-                return "NO",0,"001"
+            isnote=note_JudgeTool(x)
+            if(isnote==True):
+                return False,0,"001"#"注意事项"
             else:
-                return "NO",0,"000"
+                isoption,optionstyle,optioncode=option_JudgeTool(x)
+                if(isoption==True):
+                    return False,0,"0001"#选择题选项
+                else:
+                    return False,0,"0000"#毫无结果
             
