@@ -23,14 +23,16 @@ def examinations_location_sort(examinations_area) :
 
     locations_list=[]
     locations={}
+    last_locations={}
+    n=0;
     for examination in examinations_area:
         maxwidth=0
         maxtop=0
         mintop=10086
         minleft=10086
         maxtop_height=0
-        maxleft=0
-        maxleft_width=0
+        #maxleft=0
+        maxleft_plus_width=0
         locations={}
         for line in examination:
             if(line['location']['width']>maxwidth):
@@ -42,16 +44,21 @@ def examinations_location_sort(examinations_area) :
                 maxtop_height=line['location']['height']
             if(line['location']['left']<minleft):
                 minleft=line['location']['left']
-            if(line['location']['left']>maxleft):
-                maxleft=line['location']['left']
-                maxleft_width=line['location']['width']
-        if((maxleft+maxleft_width)>=maxwidth):     
-            maxwidth=maxleft+maxleft_width
-        locations['width']=maxwidth
+            #if(line['location']['left']>maxleft):
+             #   maxleft=line['location']['left']
+            if((line['location']['left']+line['location']['width'])>maxleft_plus_width):
+                maxleft_plus_width=(line['location']['left']+line['location']['width'])
+        locations['width']=maxleft_plus_width-minleft
         locations['top']=mintop
         locations['left']=minleft
         locations['height']=maxtop+maxtop_height-mintop
-        
+        '''if(n==0):
+            n=n+1
+            last_locations=locations
+        else:
+            n=n+1
+            if(last_locations['top']<locations['top']):
+                if()'''
         locations_list.append(locations)
     return locations_list
         
@@ -102,7 +109,8 @@ def JudgeFunction(results):
                 else:
                     examination_number=examination_number+1#将题目数加一
                     examinations_area.append(single_examination_area)#将上一single题的area提交
-                    examinations_options_area.append(single_examination_options_area)#将上一single题的area提交
+                    if(len(single_examination_options_area)!=0):
+                        examinations_options_area.append(single_examination_options_area)#将上一single题的area提交
                     #lookarea(examinations_area)
                     single_examination_area=[]#提交后清空single题的存储
                     single_examination_options_area=[]#提交后清空single题的存储
@@ -124,9 +132,9 @@ def JudgeFunction(results):
                 
             #考虑最后一行的情况，此时已经没有题干行进行判断一道题的area是否结束，
             #所以当最后一行时,直接进行area提交，结束
-            if(i==(len(results['words_result'])-1)):
-                
+            if(i==(len(results['words_result'])-1)):         
                 examinations_area.append(single_examination_area)
+                examinations_options_area.append(single_examination_options_area)
                 single_examination_area=[]
             else:
                 continue
@@ -135,9 +143,9 @@ def JudgeFunction(results):
     return examinations_area,examinations_options_area
 
 
-filepath=r'/Users/tt/Desktop/test/0012_1.jpg'
-#results=temp.accurate_ocr(filepath)
-results=temp.general_ocr(filepath)
+filepath=r'/Users/tt/Desktop/test/test.jpg'
+results=temp.accurate_ocr(filepath)
+#results=temp.general_ocr(filepath)
 
 r,op=JudgeFunction(results)
 
@@ -146,9 +154,15 @@ print("*results are:")
 lookarea(r)
 
 #print()
-#lookarea(op)
+lookarea(op)
 
 locations_list=examinations_location_sort(r)
+option_locations_list=examinations_location_sort(op)
 print(locations_list)
-tool.crop_Tool(filepath,locations_list)
+areatype=1
+tool.crop_Tool(filepath,locations_list,1)
+print("option area cut")
+print(option_locations_list)
+areatype=2
+tool.crop_Tool(filepath,option_locations_list,2)
 print("finish")

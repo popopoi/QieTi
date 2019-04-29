@@ -15,13 +15,16 @@ class MyGlobal:
         self.questionnumber="0."
 GL = MyGlobal()
 
-def crop_Tool(path,location_list):
+def crop_Tool(path,location_list,areatype):
     img = cv2.imread(path)
     i=0
     for location in location_list:
         cropped = img[location['top']:location['top']+location['height']
         , location['left']:location['left']+location['width']]
-        savepath="/Users/tt/Desktop/test/"+str(i)+".jpg"
+        if(areatype==1):
+            savepath="/Users/tt/Desktop/test/"+str(i)+".jpg" 
+        if(areatype==2):
+            savepath="/Users/tt/Desktop/test/option_"+str(i)+".jpg"
         i=i+1
         cv2.imwrite(savepath, cropped)
         
