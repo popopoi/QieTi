@@ -8,12 +8,9 @@ This is a temporary script file.
 from aip import AipOcr
 
 """ 你的 APPID AK SK """
-'''APP_ID = '15776520'
+APP_ID = '15776520'
 API_KEY = 'O8xYdXlWnIkHn5DzVXc1l1Ey'
-SECRET_KEY = 'fIAyoLQTzXowpvmDrcHKMGiK55AhsQaQ'''
-APP_ID = '15899380'
-API_KEY = '1QKo2wth8n6iUNBXmTIwA8rr'
-SECRET_KEY = 'Ax9SNpQdAqq7XR52PELiNI88i8M92UpC'
+SECRET_KEY = 'fIAyoLQTzXowpvmDrcHKMGiK55AhsQaQ'
 
 client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 
@@ -39,14 +36,11 @@ for result in results['words_result']:
 def accurate_ocr(filepath):
     image = get_file_content(filepath)
     results=client.accurate(image);
-    #print(results)
-    #print(len(results['words_result']))
-    #for result in results['words_result']:
-        #print(result['words'])
+    #print(results2)
+    print(len(results['words_result']))
+    for result in results['words_result']:
+        print(result['words'])
         #print(result['location'])
     return results
-def general_ocr(filepath):
-    image = get_file_content(filepath)
-    results=client.general(image);
-    return results
+
 accurate_ocr('/Users/tt/Desktop/timg.jpg')
