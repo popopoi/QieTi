@@ -21,10 +21,10 @@ def crop_Tool(filepath,save_dirpath,location_list,areatype):
     savepath="./"
     filename=filepath.split('/')[-1]
     filename=filename.split('.')[0]
+    print(location_list)
     print("filename is ",filename)
-    for location in location_list:
-        cropped = img[location['top']:location['top']+location['height']
-        , location['left']:location['left']+location['width']]
+    for loc in location_list:
+        cropped = img[loc['top']:loc['top']+loc['height'] , loc['left']:loc['left']+loc['width']]
         if(areatype==1):
             savepath=save_dirpath+"/"+filename+str(i)+".jpg" 
             print(savepath)
@@ -38,11 +38,11 @@ def crop_Tool(filepath,save_dirpath,location_list,areatype):
     return ：True／False
     author ：poi
 '''           
-#判断一句话是否为疑问句／命令句／是非判断句的函数
+#判断一句话是否为疑问句／命令句／是非判断句／题干标志的函数
 def questionemotion_JudgeTool(textcontent):
 
     interrogtive_dict=['吗\?','(有|是)哪(些|里)','(有|要)(几|多少)(些|种|分钟|时间|千克|米|吨|本|万)','如何.*(定义|进行|处理)','(什么|何).*(问题|区别|不同|作用|原因)',
-                       '(为|是|有)(什么|何|多少)','(想想看|请问).(怎么|区别是|看法是|多长时间)','怎样.*(理解|处理)','(问|检验.*(差异|差别|影响))',
+                       '(为|是|有)(什么|何|多少)','(想想看|请问).(怎么|区别是|看法是|多长时间)','怎样.*(理解|处理)','(问|检验).*(差异|差别|影响)',
                        '(what/why/where/how/when).\?']#疑问句
     imperative_dict=['请.*(辨析|解释|证明|说明)','求.*(概率|解|面积|值)','求解.*问题','阅读.*(回答|完成|解释)','简要说明.*区别',
                      '归纳.主要内容','概(述|论).*(历史意义|作用)','(综|结)合.*(体会|理解)','请你.*应该是','根据.*给',
@@ -50,12 +50,13 @@ def questionemotion_JudgeTool(textcontent):
                      '(试加以说明|的一项是)']#命令句
     copulative_dict=['请.*判断.*是否','(正确|错误).*（的是|的有）','则.*为','（其中|下列|上述）.*是',]#是非判断句
     
+    #flag_dict=['本题满分[0-9]+分','Section']
     key=textcontent
     for p in interrogtive_dict:
         pattern1=re.compile(p)
         res=pattern1.findall(key)
         if len(res)!=0:
-            print(p)
+            print("这里发生了什么？",p)
             
             return True,1
     for p in copulative_dict:
@@ -70,6 +71,12 @@ def questionemotion_JudgeTool(textcontent):
         if len(res)!=0:
             #print(res)
             return True,3
+    '''for p in flag_dict:
+        pattern1=re.compile(p)
+        res=pattern1.findall(key)
+        if len(res)!=0:
+            #print(res)
+            return True,4'''
     return False,0
 
 
@@ -99,20 +106,27 @@ def removespace(textcontent):
 #减少题号没有没识别完全导致错误的情况
 def questionnumber_FixedJudgeTool(textcontent):
     textcontent=removespace(textcontent)
-    pattern1 = re.compile("[0-9]+")
-    res=pattern1.findall(textcontent)
-    if(len(res)==1):  
-        a=index_of_str(textcontent,res[0])
-        if(a==0):         
-            a=int(re.sub("\D", "", res[0]))
-            b=0
-            b=int(re.sub("\D", "", GL.questionnumber))
-            if(b!=0):
-                if(a==(b+1)):
-                    return True
-    else:
-        #存在句子开头为数字的情况，这里暂时不考虑
-        '''TODO'''
+    flag_dict=['[0-9]+[^0-9]','[0-9]+设.+(为|则)','本题满分[0-9]+分','Section','Text [0-9]+','的.+(方程|结果|条件)为']
+    nn=0
+    for p in flag_dict:
+        pattern1=re.compile(p)
+        res=pattern1.findall(textcontent)
+        if(len(res)==1):  
+            a=index_of_str(textcontent,res[0])
+            if(nn==0 and a==0):         
+                a=int(re.sub("\D", "", res[0]))
+                b=0
+                b=int(re.sub("\D", "", GL.questionnumber))
+                if(b!=0):
+                    if(a==(b+1)):
+                        return True
+            if(nn!=0):
+                return True           
+        else:
+            #存在句子开头为数字的情况，一句话中存在多个数字的情况
+            '''TODO'''
+        nn=nn+1 
+         
     return False
 
 #判断是否有题号，以及题号的类型的函数
@@ -274,5 +288,7 @@ def question_JudgeTool(textcontent):
                 if(isoption==True):
                     return False,0,"0001"#选择题选项
                 else:
+                    if(questionnumber_FixedJudgeTool(x)==True):
+                        return True,0,"fixed"
                     return False,0,"0000"#毫无结果
             
