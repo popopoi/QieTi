@@ -5,16 +5,17 @@ Created on Tue Mar 26 12:00:32 2019
 
 @author: tt
 """
+#import cv2
 import re
 
-def picture_CropTool(path,location_list):
+'''def picture_CropTool(path,location_list):
     img = cv2.imread(path)
     i=0
     for location in location_list:
         cropped = img[location['top']:location['top']+location['height']
         , location['left']:location['left']+location['width']]
         savepath="./"+i+".jpg"
-        cv2.imwrite(savepath, cropped)       
+        cv2.imwrite(savepath, cropped)       '''
 '''
     判断一句话是否为疑问句／命令句／是非判断句的函数
     return ：True／False
@@ -23,13 +24,14 @@ def picture_CropTool(path,location_list):
 #判断一句话是否为疑问句／命令句／是非判断句的函数
 def questionemotion_JudgeTool(textcontent):
 
-    interrogtive_dict=['吗\?','(有|是)哪[些里]','(有|要)(几|多少)(些|种|分钟|时间|千克|米|吨|本|万)','如何.*(定义|进行|处理)','(什么|何).*(问题|区别|不同|作用|原因)',
-                       '(为|是|有)(什么|何|多少)','请问.(怎么|区别是|看法是|多长时间)','想想看','怎样.*(理解|处理)','(问|检验.*(差异|差别|影响))']#疑问句
-    imperative_dict=['请.*(辨析|解释|证明)','求.*(概率|解|面积|值)','求解.*问题','则.*为','的一项是','阅读.*[“回答”,“完成”]','简要说明.*区别',
-                     '归纳.主要内容','概[述|论].*(历史意义|作用)','[综结]合.*(体会|理解)','请你.应该是','恰当的是','其中.*是','下列.*是','根据.*给',
-                     '[句文词].*[默填]写','的(主要内涵|基本标准)','(简析|简述|分析|解释|试论).*(原因|好处|历史条件|程序|流程|意义|产生|应用|内容|影响|策略)',
-                     '试加以说明','简要描述','指出.*方面']#命令句
-    copulative_dict=['判断','是否','正确.*的是','错误.*的是']#是非判断句
+    interrogtive_dict=['吗\?','(有|是)哪(些|里)','(有|要)(几|多少)(些|种|分钟|时间|千克|米|吨|本|万)','如何.*(定义|进行|处理)','(什么|何).*(问题|区别|不同|作用|原因)',
+                       '(为|是|有)(什么|何|多少)','(想想看|请问).(怎么|区别是|看法是|多长时间)','怎样.*(理解|处理)','(问|检验.*(差异|差别|影响))',
+                       '(what/why/where/how/when).\?']#疑问句
+    imperative_dict=['请.*(辨析|解释|证明|说明)','求.*(概率|解|面积|值)','求解.*问题','阅读.*(回答|完成|解释)','简要说明.*区别',
+                     '归纳.主要内容','概(述|论).*(历史意义|作用)','(综|结)合.*(体会|理解)','请你.*应该是','根据.*给',
+                     '(句|文|词).*(默|填)写','的(主要内涵|基本标准)','(指出|简析|简述|分析|解释|试论).*(原因|好处|条件|程序|流程|意义|产生|应用|内容|影响|策略|方面)',
+                     '(试加以说明|的一项是)']#命令句
+    copulative_dict=['请.*判断.*是否','(正确|错误).*（的是|的有）','则.*为','（其中|下列|上述）.*是',]#是非判断句
     
     key=textcontent
     for p in interrogtive_dict:
@@ -188,7 +190,7 @@ def question_JudgeTool(textcontent):
             if(isoption==True):
                 return False,0,"101"
             else:
-                return  True,numberstyle,"100"
+                return  False,0,"100"
     elif(isorder==False):
         '''初步认为不为疑问／命令／是非判断。但也有可能是判断题中的陈述句。'''
         if(hasquestionnumber==True):

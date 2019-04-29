@@ -8,12 +8,14 @@ This is a temporary script file.
 from aip import AipOcr
 
 """ 你的 APPID AK SK """
-'''APP_ID = '15776520'
+APP_ID = '15776520'
 API_KEY = 'O8xYdXlWnIkHn5DzVXc1l1Ey'
-SECRET_KEY = 'fIAyoLQTzXowpvmDrcHKMGiK55AhsQaQ'''
+SECRET_KEY = 'fIAyoLQTzXowpvmDrcHKMGiK55AhsQaQ'
+'''
 APP_ID = '15899380'
 API_KEY = '1QKo2wth8n6iUNBXmTIwA8rr'
 SECRET_KEY = 'Ax9SNpQdAqq7XR52PELiNI88i8M92UpC'
+'''
 
 client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 

@@ -8,10 +8,7 @@ Created on Tue Mar 26 11:01:36 2019
 
 import temp
 import JudgeTool as tool
-filepath='/Users/tt/Desktop/timg.jpg'
 
-#results=temp.accurate_ocr(filepath)
-results=temp.general_ocr(filepath)
 
 def lookarea(examinations_area):
     print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
@@ -61,9 +58,11 @@ def JudgeFunction(results):
     #examinations_area:总的存储所有处理后数据的list,
     #存储多个（多个result集合的题目区域）single_examination_area数组
     examinations_area=[]
+    examinations_options_area=[]
     #single_examination_area:存储单个（多个result集合的题目区域）题目区域的数组
     #存储多个result（属于同一题的result），result:文本信息，包括文本内容和文本位置
     single_examination_area=[]#单个题目数据（文本／位置信息）的area
+    single_examination_options_area=[]#单个题目选项（文本／位置信息）的area
     #examination_number:题目的数量
     examination_number=0
     #current_numberlevel:当前题号类型层次标示
@@ -94,8 +93,10 @@ def JudgeFunction(results):
                 else:
                     examination_number=examination_number+1#将题目数加一
                     examinations_area.append(single_examination_area)#将上一single题的area提交
+                    examinations_options_area.append(single_examination_options_area)#将上一single题的area提交
                     #lookarea(examinations_area)
-                    single_examination_area=[]#提交后清空single题的存储空间
+                    single_examination_area=[]#提交后清空single题的存储
+                    single_examination_options_area=[]#提交后清空single题的存储
                     single_examination_area.append(result)#将下一题 (也就是本行)添加到single题的area
                 
         elif(isquestion==False):
@@ -103,12 +104,15 @@ def JudgeFunction(results):
             '''不是题干,可能是题目的一部分(选择题选项／题干的非第一行/下级题目)，
             也可能完全不属于题目(如 考出风格／非题干的一部分)，
             '''
-            '''TODO'''
             if(current_flag==0):
                 continue;
             
-            single_examination_area.append(result)#添加到当前single题的area        
+            single_examination_area.append(result)#添加到当前single题的area      
             
+            #为选择题选项的情况
+            if(code=="0001"):
+                single_examination_options_area.append(result)#添加到当前single题选项的area  
+                
             #考虑最后一行的情况，此时已经没有题干行进行判断一道题的area是否结束，
             #所以当最后一行时,直接进行area提交，结束
             if(i==(len(results['words_result'])-1)):
@@ -119,13 +123,20 @@ def JudgeFunction(results):
                 continue
                 
     print(examination_number)
-    return examinations_area
+    return examinations_area,examinations_options_area
 
 
-r=JudgeFunction(results)
+filepath='/Users/tt/Desktop/pic/0011.jpg'
+#results=temp.accurate_ocr(filepath)
+results=temp.general_ocr(filepath)
+
+r,op=JudgeFunction(results)
+
 print()
 print("*results are:")
 lookarea(r)
+print()
+lookarea(op)
 
 locations_list=examinations_location_sort(r)
 print(locations_list)
