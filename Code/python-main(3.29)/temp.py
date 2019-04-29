@@ -8,6 +8,13 @@ This is a temporary script file.
 from aip import AipOcr
 
 """ 你的 APPID AK SK """
+
+'''
+APP_ID = '16014492'
+API_KEY = 'LCg6tBRLl08bq7GBXedTw2Ft'
+SECRET_KEY = 'kGdGzrXhCFaYGDwjGIoXm7OCaMob22gW'
+'''
+'''
 APP_ID = '15776520'
 API_KEY = 'O8xYdXlWnIkHn5DzVXc1l1Ey'
 SECRET_KEY = 'fIAyoLQTzXowpvmDrcHKMGiK55AhsQaQ'
@@ -15,7 +22,7 @@ SECRET_KEY = 'fIAyoLQTzXowpvmDrcHKMGiK55AhsQaQ'
 APP_ID = '15899380'
 API_KEY = '1QKo2wth8n6iUNBXmTIwA8rr'
 SECRET_KEY = 'Ax9SNpQdAqq7XR52PELiNI88i8M92UpC'
-'''
+
 
 client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 
@@ -24,7 +31,7 @@ def get_file_content(filePath):
     with open(filePath, 'rb') as fp:
         return fp.read()
 
-image = get_file_content('/Users/tt/Desktop/timg.jpg')
+#image = get_file_content('/Users/tt/Desktop/timg.jpg')
 
 
 """ 如果有可选参数 """
@@ -51,4 +58,4 @@ def general_ocr(filepath):
     image = get_file_content(filepath)
     results=client.general(image);
     return results
-accurate_ocr('/Users/tt/Desktop/timg.jpg')
+#accurate_ocr('/Users/tt/Desktop/timg.jpg')

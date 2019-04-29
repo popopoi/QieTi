@@ -5,10 +5,9 @@ Created on Tue Mar 26 11:01:36 2019
 
 @author: tt
 """
-
 import temp
 import JudgeTool as tool
-
+  
 
 def lookarea(examinations_area):
     print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
@@ -29,6 +28,9 @@ def examinations_location_sort(examinations_area) :
         maxtop=0
         mintop=10086
         minleft=10086
+        maxtop_height=0
+        maxleft=0
+        maxleft_width=0
         locations={}
         for line in examination:
             if(line['location']['width']>maxwidth):
@@ -37,12 +39,19 @@ def examinations_location_sort(examinations_area) :
                 mintop=line['location']['top']
             if(line['location']['top']>maxtop):
                 maxtop=line['location']['top']
-            if(line['location']['top']<minleft):
+                maxtop_height=line['location']['height']
+            if(line['location']['left']<minleft):
                 minleft=line['location']['left']
+            if(line['location']['left']>maxleft):
+                maxleft=line['location']['left']
+                maxleft_width=line['location']['width']
+        if((maxleft+maxleft_width)>=maxwidth):     
+            maxwidth=maxleft+maxleft_width
         locations['width']=maxwidth
         locations['top']=mintop
         locations['left']=minleft
-        locations['height']=maxtop-mintop
+        locations['height']=maxtop+maxtop_height-mintop
+        
         locations_list.append(locations)
     return locations_list
         
@@ -54,7 +63,7 @@ def examinations_location_sort(examinations_area) :
 """
 def JudgeFunction(results):
     #print(len(results['words_result']))#36条数据
-   
+    tool.GL.questionnumber="0."
     #examinations_area:总的存储所有处理后数据的list,
     #存储多个（多个result集合的题目区域）single_examination_area数组
     examinations_area=[]
@@ -126,7 +135,7 @@ def JudgeFunction(results):
     return examinations_area,examinations_options_area
 
 
-filepath='/Users/tt/Desktop/pic/0011.jpg'
+filepath=r'/Users/tt/Desktop/test/0012_1.jpg'
 #results=temp.accurate_ocr(filepath)
 results=temp.general_ocr(filepath)
 
@@ -135,8 +144,11 @@ r,op=JudgeFunction(results)
 print()
 print("*results are:")
 lookarea(r)
-print()
-lookarea(op)
+
+#print()
+#lookarea(op)
 
 locations_list=examinations_location_sort(r)
 print(locations_list)
+tool.crop_Tool(filepath,locations_list)
+print("finish")

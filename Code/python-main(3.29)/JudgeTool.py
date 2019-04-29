@@ -5,17 +5,26 @@ Created on Tue Mar 26 12:00:32 2019
 
 @author: tt
 """
-#import cv2
 import re
+import cv2
 
-'''def picture_CropTool(path,location_list):
+class MyGlobal:
+    def __init__(self):
+        self.A = 0
+        self.B = [0]
+        self.questionnumber="0."
+GL = MyGlobal()
+
+def crop_Tool(path,location_list):
     img = cv2.imread(path)
     i=0
     for location in location_list:
         cropped = img[location['top']:location['top']+location['height']
         , location['left']:location['left']+location['width']]
-        savepath="./"+i+".jpg"
-        cv2.imwrite(savepath, cropped)       '''
+        savepath="/Users/tt/Desktop/test/"+str(i)+".jpg"
+        i=i+1
+        cv2.imwrite(savepath, cropped)
+        
 '''
     判断一句话是否为疑问句／命令句／是非判断句的函数
     return ：True／False
@@ -66,9 +75,45 @@ def index_of_str(s1, s2):
     if len(lt)==1:
         return -1
     return len(lt[0])
+
+def removespace(textcontent):
+    #print(textcontent)
+    a=textcontent
+    for i in range(len(a)):
+        if(a[0]==' '):
+            a=a[1:]
+        if(a[0]!=' '):
+            textcontent=a
+            return textcontent
+
+   
+
+#减少题号没有没识别完全导致错误的情况
+def questionnumber_FixedJudgeTool(textcontent):
+    textcontent=removespace(textcontent)
+    pattern1 = re.compile("[0-9]+")
+    res=pattern1.findall(textcontent)
+    if(len(res)==1):  
+        a=index_of_str(textcontent,res[0])
+        if(a==0):         
+            a=int(re.sub("\D", "", res[0]))
+            b=0
+            b=int(re.sub("\D", "", GL.questionnumber))
+            if(b!=0):
+                if(a==(b+1)):
+                    return True
+    else:
+        #存在句子开头为数字的情况，这里暂时不考虑
+        '''TODO'''
+    return False
+
 #判断是否有题号，以及题号的类型的函数
 def questionnumber_JudgeTool(textcontent):
-
+    
+    '''questionnumber_dict=["[一二三四五六七八九十]+、","[一二三四五六七八九十]+\.","[0-9]+\.","[0-9]+、"
+                         ,"[Ee][Gg].[0-9]+","\([0-9]+\)","\([一二三四五六七八九十]+\)"]'''
+    textcontent=removespace(textcontent)
+    
     questionnumber_dict=["[一二三四五六七八九十]+、","[一二三四五六七八九十]+\.","[0-9]+\.","[0-9]+、"
                          ,"[Ee][Gg].[0-9]+","\([0-9]+\)","\([一二三四五六七八九十]+\)"]
     key=textcontent
@@ -78,12 +123,16 @@ def questionnumber_JudgeTool(textcontent):
         res=pattern1.findall(key)
         #print(res)
         i=i+1
+        
         if(len(res)==0):
             continue
         elif(len(res)==1):
             a=index_of_str(key,res[0])
             #print(a)
-            if(a==0):
+            if(a==0): 
+                #print("before:questionnumber->:",GL.questionnumber)
+                GL.questionnumber=res[0]
+                #print("after:questionnumber->:",GL.questionnumber)
                 return True,i,"666"
             else:
                 return False,i,"404"
@@ -91,11 +140,11 @@ def questionnumber_JudgeTool(textcontent):
             a=index_of_str(key,res[0])
             #print(a)
             if(a==0):
+                GL.questionnumber=res[0]
                 return True,i,"404"
             else:
                 return False,i,"404" 
     return False,0,"505"
-
 
 
 
@@ -186,6 +235,10 @@ def question_JudgeTool(textcontent):
         if(hasquestionnumber==True):
             return True,numberstyle,"11"
         else:
+            #也可能是题号没有被识别出来 如 9. 的 . 没有被识别
+            if(questionnumber_FixedJudgeTool(x)==True):
+                return True,0,"fixed"
+            
             isoption,optionstyle,optioncode=option_JudgeTool(x)
             if(isoption==True):
                 return False,0,"101"
@@ -201,6 +254,10 @@ def question_JudgeTool(textcontent):
                 return True,0,"010"#判断题中的陈述句
         else:
             '''既没有题干语气，又没有题号，最难判断的一类。不出意外就是需要忽略的内容'''
+            #也可能是题号没有被识别出来 如 9. 的 . 没有被识别
+            if(questionnumber_FixedJudgeTool(x)==True):
+                return True,0,"fixed"
+            
             isnote=note_JudgeTool(x)
             if(isnote==True):
                 return False,0,"001"#"注意事项"

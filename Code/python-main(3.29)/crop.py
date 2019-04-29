@@ -11,6 +11,7 @@ def crop_Tool(path,location_list):
     for location in location_list:
         cropped = img[location['top']:location['top']+location['height']
         , location['left']:location['left']+location['width']]
-        savepath="./"+i+".jpg"
+        savepath="./"+str(i)+".jpg"
+        i=i+1
         cv2.imwrite(savepath, cropped)
     
