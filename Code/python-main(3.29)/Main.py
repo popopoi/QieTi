@@ -94,7 +94,7 @@ def JudgeFunction(results):
         if(code=="011" or code=="001"):
             current_flag=0  
         if(isquestion==True):
-            print(result['words'],"###Yes###",code)
+            #print(result['words'],"###Yes###",code)
             '''是题干。考虑属于上级题目的情况（如 一、单项选择题），存在上下级时，忽略。TODO'''
 
             
@@ -117,7 +117,7 @@ def JudgeFunction(results):
                     single_examination_area.append(result)#将下一题 (也就是本行)添加到single题的area
                 
         elif(isquestion==False):
-            print(result['words'],"&&&NO&&&",code)
+            #print(result['words'],"&&&NO&&&",code)
             '''不是题干,可能是题目的一部分(选择题选项／题干的非第一行/下级题目)，
             也可能完全不属于题目(如 考出风格／非题干的一部分)，
             '''
@@ -142,27 +142,37 @@ def JudgeFunction(results):
     print(examination_number)
     return examinations_area,examinations_options_area
 
+def test():
+    filepath=r'/Users/tt/Desktop/test/test.jpg'
+    results=temp.accurate_ocr(filepath)
+    #results=temp.general_ocr(filepath)
+    
+    r,op=JudgeFunction(results)
+    
+    print()
+    print("*results are:")
+    lookarea(r)
+    
+    #print()
+    lookarea(op)
+    
+    locations_list=examinations_location_sort(r)
+    option_locations_list=examinations_location_sort(op)
+    print(locations_list)
+    areatype=1
+    tool.crop_Tool(filepath,locations_list,1)
+    print("option area cut")
+    print(option_locations_list)
+    areatype=2
+    tool.crop_Tool(filepath,option_locations_list,2)
+    print("finish")
 
-filepath=r'/Users/tt/Desktop/test/test.jpg'
-results=temp.accurate_ocr(filepath)
-#results=temp.general_ocr(filepath)
 
-r,op=JudgeFunction(results)
-
-print()
-print("*results are:")
-lookarea(r)
-
-#print()
-lookarea(op)
-
-locations_list=examinations_location_sort(r)
-option_locations_list=examinations_location_sort(op)
-print(locations_list)
-areatype=1
-tool.crop_Tool(filepath,locations_list,1)
-print("option area cut")
-print(option_locations_list)
-areatype=2
-tool.crop_Tool(filepath,option_locations_list,2)
-print("finish")
+def singleocr(filepath,save_dirpath,ocrtype):
+    if(ocrtype==1):
+        results=temp.accurate_ocr(filepath)
+    elif(ocrtype!=1):
+        results=temp.general_ocr(filepath)
+    r,op=JudgeFunction(results)   
+    locations_list=examinations_location_sort(r)
+    tool.crop_Tool(filepath,save_dirpath,locations_list,1)
