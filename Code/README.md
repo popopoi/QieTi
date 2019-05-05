@@ -21,15 +21,16 @@ python：Python 3.7.0
 2.anaconda命令行创建虚拟环境（python建议3.7）：
 conda create -n your_env_name python=X.X 
 
-3.激活虚拟环境
+3.激活虚拟环境(your_env_name即你的环境的名字)
 source activate your_env_name
 
-4.安装opencv（opencv-python的版本号可能不同，不同版本号可能与一些系统不兼容）
+4.安装opencv（opencv-python的版本号可能不同，不同版本号可能与一些系统不兼容，后面的镜像源可以更换，openc的版本号按理来说应该可以更换成最新的）
 pip install opencv-python==3.4.2.16 -i https://pypi.mirrors.ustc.edu.cn/simple/
 或者
-anaconda里面用包管理器安装
+anaconda里面用包管理器安装(可能是网络和墙的问题，经常安装不成功)
 
-5.
+5.安装baidu-aip包
+pip install baidu-aip
 
 ### 项目版本更新：
 main3.29－00.00 :接通了百度api文本识别接口，实现了基本的自然语言处理（对基本题号和题目情感倾向的处理）
@@ -47,4 +48,6 @@ main4.26-21:40 :实现了基本的GUI图形界面，构建了基本的批量识�
 main4.28-13:25 :修改了题号识别不准确情况下题目的判定模块，修复了图形化界面删除图片后顺序错乱的bug
 
 main4.28-16:00 :修复了图形化界面删除图片的bug(最后一张的情况)，修改了一些交互
+
+main5.5-20:20 :添加了进度条显示切题的进度（采用多线程并行）
 

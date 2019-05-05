@@ -10,6 +10,7 @@ import os.path
 import Main
 import imghdr
 import _thread
+import threading
 import time
 
 source_dirpath=""
@@ -29,7 +30,8 @@ save_imagefilepaths = []
 
 save_imagenumber=0
 deleted_imagenumber=0
-
+all_imagenumber=0#总共有几张要处理
+imagenumber=0#当前正在处理第几张
 startocr_finished=False
 class mainapp:
     
@@ -123,21 +125,42 @@ class mainapp:
             b=tkinter.messagebox.askyesno('确认要切题吗？',"这可能需要几秒甚至几分钟！")
             if(b==True):
                 #_thread.start_new_thread(tkinter.messagebox.showinfo,('正在为您切题',"请稍等..."))
-                tkinter.messagebox.showinfo('点击ok键开始运行',"点击ok键后开始...切题需要几秒甚至几分钟请稍等")
-                #_thread.start_new_thread(self.startOcr,(source_dirpath,save_dirpath))
-                self.startOcr(source_dirpath,save_dirpath)
-                global startocr_finished
-                while(startocr_finished==False):
-                    if(startocr_finished==True):
-                        time.sleep(1)
-                        break;
-                showpic()
+                #tkinter.messagebox.showinfo('点击ok键开始运行',"点击ok键后开始...切题需要几秒甚至几分钟请稍等")
+                #self.startOcr(source_dirpath,save_dirpath)
+                tbar=threading.Thread(target=progressbar,args=())
+                #tbar.setDaemon(True)#设置为后台线程
+
+                t = threading.Thread(target=self.startOcr,args=(source_dirpath,save_dirpath))
+                t.setDaemon(True)#设置为后台线程
+                
+                '''tjudge=threading.Thread(target=self.judgeocrfinished,args=())
+                tjudge.setDaemon(True)#设置为后台线程'''
+                
+                tbar.start()#开启线程
+                t.start()#开启线程
+                #tjudge.start()
+                #_thread.start_new_thread(self.startOcr,(source_dirpath,save_dirpath)) 
+                
+                
+    '''def judgeocrfinished(self):
+        global startocr_finished
+        while(startocr_finished==False):
+            if(startocr_finished==True):
+                break;
+            time.sleep(0.5)
+            #print("not finished!")   
+        showpic()'''
     def startOcr(self,source_dirpath,save_dirpath):
         global imagefilepaths
+        global all_imagenumber
         imagefilepaths=self.get_imagefilepaths_bydirpath(source_dirpath)
         if(len(imagefilepaths)<=0):
             print("文件夹下没有可用的图片")
             return
+        else:
+            all_imagenumber=len(imagefilepaths)
+            
+        global imagenumber
         imagenumber=1
         for filepath in imagefilepaths:
             print("#####################################")
@@ -180,13 +203,79 @@ class mainapp:
                 if(self.is_img(source_dirpath+"/"+files[index])==True):
                     imagefilepaths.append(source_dirpath+"/"+files[index])
         return imagefilepaths 
+    
+    
+    
+'''
+    显示切题进度的进度条界面，显示切题当前的进度，进度完成后跳出showpic界面
+    author ：Yuta Mizuki
+'''   
+class progressbar:
+    def __init__(self):
+        self.r=Toplevel()
+        self.r.title('切题进度')
+        self.r.geometry('630x150')
+        # 设置下载进度条
+        Label(self.r, text='切题进度:', ).place(x=50, y=60)
+        self.c = Canvas(self.r, width=465, height=22, bg="white")
+        self.c.place(x=110, y=60)
+        #self.progress()
+        #btn_download =Button(self.r, text='启动进度条', command=self.progress)
+        #btn_download.place(x=400, y=105)
+        self.progress()
+        self.r.mainloop()
+    def progress(self):   
+        global all_imagenumber
+        global imagenumber
+        fill_line = self.c.create_rectangle(1.5, 1.5, 0, 23, width=0, fill="green")
+        x = 100*all_imagenumber  # 未知变量，可更改
+        tt=465
+        n = 465 / x  # tt是矩形填充满的次数,n为当前进度条的长度
+        cut=465 / all_imagenumber
+        nn=1#当前正在处理第nn张图片，初始为1
+       
+        for i in range(x):
+            n = n + 465 / x
+            self.c.coords(fill_line, (0, 0, n, 60))
+            self.r.update()
+            time.sleep(0.03)
+            while(n>=cut*nn):
+                time.sleep(0.03)
+                if(imagenumber>nn):
+                    break
+            nn=imagenumber
+        showpic()    
+        '''for i in range(x):
+            n = n + 465 / x
+            #print(n)
+            self.c.coords(fill_line, (0, 0, n, 60))
+            self.r.update()
+            time.sleep(0.02)'''
+        '''# 清空进度条  # 控制进度条流动的速度
+     
+        fill_line = Canvas.create_rectangle(1.5, 1.5, 0, 23, width=0, fill="white")
+        x = 500  # 未知变量，可更改
+        n = 465 / x  # 465是矩形填充满的次数
+     
+        for t in range(x):
+            n = n + 465 / x
+            # 以矩形的长度作为变量值更新
+            Canvas.coords(fill_line, (0, 0, n, 60))
+            r.update()
+            time.sleep(0)  # 时间为0，即飞速清空进度条'''
+     
+
+
+'''
+    人工校对的界面，显示切题结果的图片并且能够作手动删除操作
+    author ：Yuta Mizuki
+'''
 class showpic:
     def __init__(self):
         r1=Toplevel()
         r1.title('切题结果人工校对')
         r1.geometry('600x400')
 
-        
         #根据图库路径source_dirpath开始遍历识别，识别结果存储在save_dirpath文件夹
         #self.startOcr(source_dirpath,save_dirpath)
         #_thread.start_new_thread(self.startOcr,(source_dirpath,save_dirpath))

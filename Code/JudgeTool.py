@@ -21,10 +21,10 @@ def crop_Tool(filepath,save_dirpath,location_list,areatype):
     savepath="./"
     filename=filepath.split('/')[-1]
     filename=filename.split('.')[0]
-    print(location_list)
     print("filename is ",filename)
-    for loc in location_list:
-        cropped = img[loc['top']:loc['top']+loc['height'] , loc['left']:loc['left']+loc['width']]
+    for location in location_list:
+        cropped = img[location['top']:location['top']+location['height']
+        , location['left']:location['left']+location['width']]
         if(areatype==1):
             savepath=save_dirpath+"/"+filename+str(i)+".jpg" 
             print(savepath)
@@ -106,7 +106,7 @@ def removespace(textcontent):
 #减少题号没有没识别完全导致错误的情况
 def questionnumber_FixedJudgeTool(textcontent):
     textcontent=removespace(textcontent)
-    flag_dict=['[0-9]+[^0-9]','[0-9]+设.+(为|则)','本题满分[0-9]+分','Section','Text [0-9]+','的.+(方程|结果|条件)为']
+    flag_dict=["[0-9]+",'本题满分[0-9]+分','Section']
     nn=0
     for p in flag_dict:
         pattern1=re.compile(p)
@@ -123,7 +123,7 @@ def questionnumber_FixedJudgeTool(textcontent):
             if(nn!=0):
                 return True           
         else:
-            #存在句子开头为数字的情况，一句话中存在多个数字的情况
+            #存在句子开头为数字的情况，这里暂时不考虑
             '''TODO'''
         nn=nn+1 
          

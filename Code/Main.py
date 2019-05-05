@@ -117,7 +117,7 @@ def JudgeFunction(results):
                     single_examination_area.append(result)#将下一题 (也就是本行)添加到single题的area
                 
         elif(isquestion==False):
-            print(result['words'],"&&&NO&&&",code)
+            #print(result['words'],"&&&NO&&&",code)
             '''不是题干,可能是题目的一部分(选择题选项／题干的非第一行/下级题目)，
             也可能完全不属于题目(如 考出风格／非题干的一部分)，
             '''
@@ -143,8 +143,7 @@ def JudgeFunction(results):
     return examinations_area,examinations_options_area
 
 def test():
-    #filepath=r'/Users/tt/Desktop/t/0009_1.jpg'
-    filepath="C:/Users/HOLO/Desktop/1/0002_3.jpg"
+    filepath=r'/Users/tt/Desktop/t/0009_1.jpg'
     #results=temp.accurate_ocr(filepath)
     results=temp.general_ocr(filepath)
     
@@ -161,8 +160,7 @@ def test():
     option_locations_list=examinations_location_sort(op)
     print(locations_list)
     areatype=1
-    #tool.crop_Tool(filepath,"/Users/tt/Desktop/t",locations_list,1)
-    tool.crop_Tool(filepath,"C:\\Users\\HOLO\\Desktop\\1",locations_list,1)
+    tool.crop_Tool(filepath,"/Users/tt/Desktop/t",locations_list,1)
     #print("option area cut")
     #print(option_locations_list)
     #areatype=2
@@ -177,7 +175,6 @@ def singleocr(filepath,save_dirpath,ocrtype):
         results=temp.general_ocr(filepath)
     r,op=JudgeFunction(results)   
     locations_list=examinations_location_sort(r)
-    print(locations_list)
     tool.crop_Tool(filepath,save_dirpath,locations_list,1)
     
-test()
+#test()
